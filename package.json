@@ -3,10 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "musiclist": "node musiclist"
   },
   "dependencies": {
     "iconv": "1.2.4",
-    "cheerio": "0.10.6"
+    "cheerio": "0.10.6",
+    "natural": "0.1.19"
   }
 }
