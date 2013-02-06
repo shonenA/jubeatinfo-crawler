@@ -14,6 +14,11 @@ fs.readFile('eagate.json', function(err, data) {
         var ret = join();
 
         fs.writeFile('join.json', JSON.stringify(ret, null, 2));
+        fs.writeFile('../www/data/list.txt', ret.map(function(e){
+                return [e.name, e.artist, e.bpm,
+                    e.difficulty.bsc, e.difficulty.adv, e.difficulty.ext,
+                    e.notecount.bsc, e.notecount.adv, e.notecount.ext, e.img].join('\t');
+            }).join('\n'));
     });
 });
 
