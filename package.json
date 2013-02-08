@@ -8,6 +8,7 @@
   "dependencies": {
     "iconv": "1.2.4",
     "cheerio": "0.10.6",
-    "natural": "0.1.19"
+    "natural": "0.1.19",
+    "strftime": "0.5.0"
   }
 }
