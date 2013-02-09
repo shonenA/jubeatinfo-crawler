@@ -2,16 +2,38 @@ var Crawler = require('./lib/Crawler');
 var fs = require('fs');
 var strftime = require('strftime');
 
+var Queue = function() {};
+
+Queue.prototype.load = function() {
+    var queue = fs.readFileSync('../data/queue', 'ascii');
+    queue = queue.split('\n');
+    this.queue = [];
+    for(var i in queue) {
+        if( queue[i] ) this.queue.push(queue[i]);
+    }
+}
+
+Queue.prototype.save = function() {
+    fs.writeFileSync('../data/queue', this.queue.join('\n'));
+}
+
+Queue.prototype.pop = function() {
+    return this.queue.shift();
+}
+
+Queue.prototype.push = function(str) {
+    this.queue.push();
+}
+
+Queue.prototype.get = function() {
+    return this.queue[0];
+}
+
+Queue.prototype.length = function() {
+    return this.queue.length;
+}
+
 var c = new Crawler();
-//c.getPlaydataMain(57710029748673);
-c.getPlaydataMain(57710029256457); // UNUSED
-//c.getPlaydataSummary(57710029748673); // SHONEN.A
-//c.getPlaydataSummary(57710029256457); // UNUSED
-//c.getPlaydataSummary(57710029539329); // KCM1700
-//c.getPlaydataSummary(57710029431862); // SGM
-//c.getPlaydataSummary(57710029248344); // NTOPIA
-//c.getPlaydataSummary(57710026610414); // ARKIND
-//c.getPlaydataSummary(57710029457573); // FLUEGEL
 
 var playdata = {};
 
@@ -30,7 +52,6 @@ c.on('playdataSummary.data', function(rivalId, key, name, bsc, adv, ext) {
     playdata[rivalId].history[key] = {
         key:key, name:name, bsc:bsc, adv:adv, ext:ext
     };
-    console.log(name, '수집');
 });
 
 function values(a) {
@@ -43,8 +64,6 @@ function values(a) {
 
 c.on('playdataSummary.end', function(rivalId) {
     var filename = strftime('%Y%m%d') + '_' + rivalId + '.json';
-
-    fs.writeFile('data/' + filename, JSON.stringify(playdata[rivalId], null, 2));
 
     var cvtbl = {
         name: 'user_name',
@@ -70,7 +89,42 @@ c.on('playdataSummary.end', function(rivalId) {
                     ]
                  }).reduce(function(a,b){return a.concat(b);});
 
-    fs.writeFile('../www/data/' + filename, JSON.stringify(forInfo));
-    console.log(rivalId + ' 완료');
+    var summaryPath = '../data/summary/' + rivalId;
+    if( !fs.existsSync(summaryPath) ) {
+        fs.mkdirSync(summaryPath);
+    }
+    fs.writeFile(summaryPath + '/' + strftime('%Y%m%d') + '.json', JSON.stringify(forInfo));
+    console.log(rivalId + ' 수집 완료');
+
+    playdata[rivalId] = {};
+
+    c.emit('getPlaydata.end', rivalId);
 });
+
+function getPlaydata() {
+    var queue = new Queue();
+    queue.load();
+
+    if( queue.length() > 0 ) {
+        c.getPlaydataMain(queue.get());
+        
+        c.once('getPlaydata.end', function(rivalId) {
+            queue.load();
+            if( rivalId != queue.get() ) {
+                // XXX ???
+                console.log('???');
+                return;
+            }
+            queue.pop();
+            queue.save();
+
+            process.nextTick(getPlaydata);
+        });
+    } else {
+        console.log('데이터 없음, 1분동안 기다림');
+        setTimeout(function() { process.nextTick(getPlaydata); }, 60000); // 1분 뒤에 다시 큐 감시
+    }
+}
+
+getPlaydata();
 
