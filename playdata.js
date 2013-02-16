@@ -47,6 +47,10 @@ c.on('playdataMain.end', function(rivalId) {
     c.getPlaydataSummary(rivalId);
 });
 
+c.on('playdataMain.error', function(error, rivalId) {
+    c.emit('getPlaydata.end', error, rivalId);
+});
+
 c.on('playdataSummary.data', function(rivalId, key, name, bsc, adv, ext) {
     if( !playdata[rivalId].history ) playdata[rivalId].history = {};
     playdata[rivalId].history[key] = {
@@ -98,7 +102,7 @@ c.on('playdataSummary.end', function(rivalId) {
 
     playdata[rivalId] = {};
 
-    c.emit('getPlaydata.end', rivalId);
+    c.emit('getPlaydata.end', null, rivalId);
 });
 
 function getPlaydata() {
@@ -108,7 +112,13 @@ function getPlaydata() {
     if( queue.length() > 0 ) {
         c.getPlaydataMain(queue.get());
         
-        c.once('getPlaydata.end', function(rivalId) {
+        c.once('getPlaydata.end', function(error, rivalId) {
+            if( error ) {
+                console.log(error);
+                setTimeout(function() { process.nextTick(getPlaydata); }, 60000); // 1분 뒤에 다시 큐 감시
+                return;
+            }
+
             queue.load();
             if( rivalId != queue.get() ) {
                 // XXX ???
