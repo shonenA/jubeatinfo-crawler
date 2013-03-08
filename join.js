@@ -45,6 +45,9 @@ function join() {
         }
 
         var matched = atwiki[max.cur];
+        if( max.val * 2 > name.length ) {
+            matched = {difficulty:{},notecount:{}};
+        }
 
         ret.push({
             name: name,
