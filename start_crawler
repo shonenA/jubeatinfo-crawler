@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mkdir -p logs
+node playdata >> logs/playdata_logs 2>> logs/error_logs &
+
