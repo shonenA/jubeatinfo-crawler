@@ -1,6 +1,7 @@
 var Crawler = require('./lib/Crawler');
 var fs = require('fs');
 var strftime = require('strftime');
+var sqlite = require('sqlite3').verbose();
 
 var Queue = function() {};
 
@@ -98,6 +99,23 @@ c.on('playdataSummary.end', function(rivalId) {
         fs.mkdirSync(summaryPath);
     }
     fs.writeFile(summaryPath + '/' + strftime('%Y%m%d') + '.json', JSON.stringify(forInfo));
+
+    // write to db
+    var db = new sqlite.Database('../data/jubeatinfo.sqlite3', function() {
+        var stmt = null;
+
+        stmt = db.prepare("INSERT OR IGNORE INTO summary VALUES (?, ?, ?, ?, ?, ?)");
+        for( var i in forInfo.history ) {
+            var h = forInfo.history[i];
+            var score = (parseInt(h.score)==h.score)?h.score:0;
+            stmt.run(rivalId, h.music, h.difficulty, score, h.fc, h.date);
+        }
+
+        stmt.finalize(function() {
+            db.close();
+        });
+    });
+
     console.log(rivalId + ' 수집 완료');
 
     playdata[rivalId] = {};
@@ -114,7 +132,7 @@ function getPlaydata() {
         
         c.once('getPlaydata.end', function(error, rivalId) {
             if( error ) {
-                console.log(error);
+                console.error(error);
                 setTimeout(function() { process.nextTick(getPlaydata); }, 60000); // 1분 뒤에 다시 큐 감시
                 return;
             }
@@ -122,7 +140,7 @@ function getPlaydata() {
             queue.load();
             if( rivalId != queue.get() ) {
                 // XXX ???
-                console.log('???');
+                console.error('???');
                 return;
             }
             queue.pop();
