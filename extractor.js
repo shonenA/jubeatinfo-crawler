@@ -20,7 +20,7 @@ function createDb() {
 function createTable() {
     console.log("createTable summary");
     db.run("CREATE TABLE IF NOT EXISTS summary (rivalid INTEGER, music TEXT, difficulty TEXT, score INTEGER, fc INTEGER, date TEXT)", function() {
-        db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_score ON summary (rivalid, music, difficulty, score)", function() {
+        db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_score ON summary (rivalid, music, difficulty, score, fc)", function() {
             db.run("PRAGMA synchronous = OFF");
             db.run("PRAGMA journal_mode = MEMORY", prepareRows);
         });
