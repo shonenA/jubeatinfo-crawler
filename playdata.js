@@ -92,7 +92,7 @@ c.on('playdataSummary.end', function(rivalId) {
                         {music:e.name, difficulty:"ADVANCED", score:e.adv.score, date:date, fc:e.adv.fc},
                         {music:e.name, difficulty:"EXTREME", score:e.ext.score, date:date, fc:e.ext.fc}
                     ]
-                 }).reduce(function(a,b){return a.concat(b);});
+                 }).reduce(function(a,b){return a.concat(b);}, []);
 
     var summaryPath = '../data/summary/' + rivalId;
     if( !fs.existsSync(summaryPath) ) {
