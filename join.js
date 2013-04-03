@@ -7,7 +7,7 @@ fs.readFile('eagate.json', function(err, data) {
     if( err ) { return; }
     eagate = JSON.parse(data);
 
-    fs.readFile('atwiki.json', function(err, data) {
+    fs.readFile('bemaniwiki.json', function(err, data) {
         if( err ) { return; }
         atwiki = JSON.parse(data);
 

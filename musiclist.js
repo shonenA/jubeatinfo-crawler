@@ -20,7 +20,7 @@ c.on('music.end', function() {
 
 var atwikidata = [];
 
-c.getAtwikiMusicList();
+//c.getAtwikiMusicList();
 
 c.on('atwiki.data', function(name, artist, bpm, difficulty, notecount) {
     console.log('atwiki:' + name);
@@ -30,5 +30,20 @@ c.on('atwiki.data', function(name, artist, bpm, difficulty, notecount) {
 c.on('atwiki.end', function() {
     console.log('atwiki.end');
     fs.writeFile('atwiki.json', JSON.stringify(atwikidata));
+});
+
+
+var bemaniwikidata = [];
+
+c.getBemaniwikiMusicList();
+
+c.on('bemaniwiki.data', function(name, artist, bpm, difficulty, notecount) {
+    console.log('bemaniwiki:' + name);
+    bemaniwikidata.push({name:name,artist:artist,bpm:bpm,difficulty:difficulty,notecount:notecount});
+});
+
+c.on('bemaniwiki.end', function() {
+    console.log('bemaniwiki.end');
+    fs.writeFile('bemaniwiki.json', JSON.stringify(bemaniwikidata));
 });
 
